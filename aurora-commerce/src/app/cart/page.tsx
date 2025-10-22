@@ -2,7 +2,7 @@ import React from 'react';
 import { supabase } from '../../lib/supabase/server';
 import { Product, CartItem } from '../../types';
 import { applyCustomPricingRules, CartItemWithPrice } from '../../services/pricing';
-import ProductImage from '../../components/ProductImage';
+import CartItemsList from '../../components/CartItemsList';
 
 // Mock cart data for development
 const mockCartItems: CartItem[] = [
@@ -99,73 +99,6 @@ function convertToCartItemWithPrice(cartItems: CartItem[]): CartItemWithPrice[] 
   }));
 }
 
-interface CartItemComponentProps {
-  item: CartItem;
-  onUpdateQuantity: (productId: string, quantity: number) => void;
-  onRemoveItem: (productId: string) => void;
-}
-
-function CartItemComponent({ item, onUpdateQuantity, onRemoveItem }: CartItemComponentProps) {
-  if (!item.product) return null;
-
-  const { product } = item;
-  const itemTotal = product.price * item.quantity;
-
-  return (
-    <div className="flex items-center gap-4 p-4 bg-white rounded-lg shadow-sm border">
-      <ProductImage
-        src={product.imageUrl}
-        alt={product.name}
-        className="w-20 h-20 object-cover rounded-md"
-      />
-      
-      <div className="flex-1 min-w-0">
-        <h3 className="text-lg font-semibold text-gray-900 truncate">
-          {product.name}
-        </h3>
-        <p className="text-sm text-gray-500 mb-1">{product.category}</p>
-        <p className="text-lg font-bold text-green-600">
-          ${product.price.toFixed(2)}
-        </p>
-      </div>
-
-      <div className="flex items-center gap-3">
-        <div className="flex items-center border rounded-lg">
-          <button
-            className="px-3 py-1 text-gray-600 hover:bg-gray-100 transition-colors"
-            onClick={() => onUpdateQuantity(product.id, Math.max(0, item.quantity - 1))}
-          >
-            -
-          </button>
-          <span className="px-4 py-1 text-center min-w-12">
-            {item.quantity}
-          </span>
-          <button
-            className="px-3 py-1 text-gray-600 hover:bg-gray-100 transition-colors"
-            onClick={() => onUpdateQuantity(product.id, item.quantity + 1)}
-          >
-            +
-          </button>
-        </div>
-        
-        <div className="text-right min-w-20">
-          <p className="text-lg font-bold text-gray-900">
-            ${itemTotal.toFixed(2)}
-          </p>
-        </div>
-        
-        <button
-          className="text-red-600 hover:text-red-800 transition-colors p-1"
-          onClick={() => onRemoveItem(product.id)}
-          title="Remove item"
-        >
-          🗑️
-        </button>
-      </div>
-    </div>
-  );
-}
-
 export default async function CartPage() {
   const cartItems = await getCartItems();
   const populatedCartItems = await getProductsForCart(cartItems);
@@ -216,31 +149,7 @@ export default async function CartPage() {
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
-          <div className="lg:col-span-2 space-y-4">
-            {populatedCartItems.map((item) => (
-              <CartItemComponent
-                key={item.productId}
-                item={item}
-                onUpdateQuantity={(productId: string, quantity: number) => {
-                  // In a real app, this would update the cart in state/database
-                  console.log(`Update ${productId} quantity to ${quantity}`);
-                }}
-                onRemoveItem={(productId: string) => {
-                  // In a real app, this would remove the item from cart
-                  console.log(`Remove ${productId} from cart`);
-                }}
-              />
-            ))}
-            
-            <div className="pt-4">
-              <a
-                href="/"
-                className="text-blue-600 hover:text-blue-800 font-medium"
-              >
-                ← Continue Shopping
-              </a>
-            </div>
-          </div>
+          <CartItemsList cartItems={populatedCartItems} />
 
           {/* Order Summary */}
           <div className="lg:col-span-1">
