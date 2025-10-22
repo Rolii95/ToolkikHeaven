@@ -14,22 +14,25 @@
     "test:services": "npx ts-node -e \"import('./src/services/demo.ts').then(m => m.runAllDemos())\""
   },
   "dependencies": {
-    "next": "14.2.33",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "@supabase/supabase-js": "^2.38.0",
-    "@supabase/ssr": "^0.5.1",
-    "tailwindcss": "^3.3.0",
-    "postcss": "^8.4.0",
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.76.1",
     "autoprefixer": "^10.4.0",
     "clsx": "^2.0.0",
-    "tailwind-merge": "^2.0.0"
+    "dotenv": "^17.2.3",
+    "next": "14.2.33",
+    "postcss": "^8.4.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "tailwind-merge": "^2.0.0",
+    "tailwindcss": "^3.3.0"
   },
   "devDependencies": {
-    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
     "eslint": "^8.0.0",
     "prettier": "^2.0.0",
     "ts-node": "^10.9.0",
-    "@types/node": "^20.0.0"
+    "typescript": "^5.0.0"
   }
 }

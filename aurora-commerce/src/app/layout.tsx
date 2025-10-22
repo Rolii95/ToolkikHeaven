@@ -1,16 +1,30 @@
 import React from 'react';
+import { Inter } from 'next/font/google';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import '../styles/globals.css';
 
-const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    return (
-        <div className="flex flex-col min-h-screen">
-            <Header />
-            <main className="flex-grow">{children}</main>
-            <Footer />
-        </div>
-    );
+const inter = Inter({ subsets: ['latin'] });
+
+export const metadata = {
+  title: 'Aurora Commerce - Smart E-commerce Platform',
+  description: 'Discover amazing products with smart pricing and fast delivery',
 };
 
-export default Layout;
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en" className={inter.className}>
+      <body className="flex flex-col min-h-screen bg-gray-50">
+        <Header />
+        <main className="flex-grow">
+          {children}
+        </main>
+        <Footer />
+      </body>
+    </html>
+  );
+}

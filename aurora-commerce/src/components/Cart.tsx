@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { useCart } from '../lib/cart'; // Assuming you have a cart context or hook
 

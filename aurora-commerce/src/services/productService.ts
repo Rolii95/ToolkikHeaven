@@ -11,7 +11,9 @@ const PRODUCTS_DB: Product[] = [
     description: 'High-quality wireless headphones with noise cancellation',
     price: 199.99,
     imageUrl: '/images/headphones.jpg',
-    category: 'Electronics'
+    category: 'Electronics',
+    stock: 25,
+    tags: ['wireless', 'audio', 'noise-cancellation']
   },
   {
     id: '2',
@@ -19,7 +21,9 @@ const PRODUCTS_DB: Product[] = [
     description: 'Feature-rich smartwatch with fitness tracking',
     price: 299.99,
     imageUrl: '/images/smartwatch.jpg',
-    category: 'Electronics'
+    category: 'Electronics',
+    stock: 15,
+    tags: ['smartwatch', 'fitness', 'wearable']
   },
   {
     id: '3',
@@ -27,7 +31,9 @@ const PRODUCTS_DB: Product[] = [
     description: 'Durable backpack designed for laptops and tech gear',
     price: 89.99,
     imageUrl: '/images/backpack.jpg',
-    category: 'Accessories'
+    category: 'Accessories',
+    stock: 40,
+    tags: ['backpack', 'laptop', 'travel']
   },
   {
     id: '4',
@@ -35,7 +41,9 @@ const PRODUCTS_DB: Product[] = [
     description: 'Portable speaker with premium sound quality',
     price: 129.99,
     imageUrl: '/images/speaker.jpg',
-    category: 'Electronics'
+    category: 'Electronics',
+    stock: 30,
+    tags: ['bluetooth', 'speaker', 'portable']
   },
   {
     id: '5',
@@ -43,7 +51,9 @@ const PRODUCTS_DB: Product[] = [
     description: 'Ergonomic wireless mouse with precision tracking',
     price: 59.99,
     imageUrl: '/images/mouse.jpg',
-    category: 'Electronics'
+    category: 'Electronics',
+    stock: 50,
+    tags: ['mouse', 'wireless', 'ergonomic']
   }
 ];
 
