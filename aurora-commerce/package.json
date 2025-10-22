@@ -7,7 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "demo": "npx ts-node src/services/demo.ts",
+    "demo:pricing": "npx ts-node -e \"import('./src/services/demo.ts').then(m => m.demoPricingRules())\"",
+    "demo:fulfillment": "npx ts-node -e \"import('./src/services/demo.ts').then(m => m.demoFulfillmentProcessing())\"",
+    "test:services": "npx ts-node -e \"import('./src/services/demo.ts').then(m => m.runAllDemos())\""
   },
   "dependencies": {
     "next": "14.0.0",
@@ -21,6 +25,8 @@
   "devDependencies": {
     "typescript": "^5.0.0",
     "eslint": "^8.0.0",
-    "prettier": "^2.0.0"
+    "prettier": "^2.0.0",
+    "ts-node": "^10.9.0",
+    "@types/node": "^20.0.0"
   }
 }
