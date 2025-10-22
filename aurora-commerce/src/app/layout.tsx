@@ -2,6 +2,8 @@ import React from 'react';
 import { Inter } from 'next/font/google';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import MobileNavBar from '../components/MobileNavBar';
+import CartNotifications from '../components/CartNotifications';
 import '../styles/globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -24,6 +26,8 @@ export default function RootLayout({
           {children}
         </main>
         <Footer />
+        <MobileNavBar />
+        <CartNotifications />
       </body>
     </html>
   );

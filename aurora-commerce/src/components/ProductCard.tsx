@@ -77,7 +77,11 @@ export default function ProductCard({ product }: ProductCardProps) {
         <div className="flex gap-2">
           <AddToCartButton 
             productId={product.id}
+            productName={product.name}
+            productPrice={product.price}
+            productImage={product.imageUrl}
             className="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors text-sm font-medium"
+            variant="primary"
           />
           <a 
             href={`/product/${product.id}`}

@@ -234,6 +234,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 <div className="flex gap-4">
                   <AddToCartButton
                     productId={product.id}
+                    productName={product.name}
+                    productPrice={product.price}
+                    productImage={product.imageUrl}
                     disabled={product.stock === 0}
                     className="flex-1 bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                   >
