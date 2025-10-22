@@ -1,15 +1,22 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ShoppingCart, Menu } from 'lucide-react';
 import AuthButton from './AuthButton';
 import CartDrawer from './CartDrawer';
+import SearchInput from './SearchInput';
 import { useCartItemCount, useCartDrawer } from '../lib/store/cartStore';
 
 export default function Header() {
+  const router = useRouter();
   const itemCount = useCartItemCount();
   const { toggle: toggleCartDrawer } = useCartDrawer();
+
+  const handleSearchResultSelect = useCallback((productId: string) => {
+    router.push(`/product/${productId}`);
+  }, [router]);
 
   return (
     <>
@@ -24,8 +31,17 @@ export default function Header() {
               </Link>
             </div>
 
+            {/* Search Bar - Desktop */}
+            <div className="hidden md:flex flex-1 max-w-lg mx-8">
+              <SearchInput 
+                placeholder="Search products..."
+                onResultSelect={handleSearchResultSelect}
+                className="w-full"
+              />
+            </div>
+
             {/* Navigation */}
-            <nav className="hidden md:flex space-x-8">
+            <nav className="hidden lg:flex space-x-6">
               <Link 
                 href="/" 
                 className="text-gray-600 hover:text-blue-600 font-medium transition-colors"
@@ -53,8 +69,10 @@ export default function Header() {
             </nav>
 
             {/* Action buttons */}
-            <div className="hidden md:flex items-center space-x-4">
-              <AuthButton />
+            <div className="flex items-center space-x-4">
+              <div className="hidden md:block">
+                <AuthButton />
+              </div>
               
               {/* Cart Button with Live Count */}
               <button
@@ -74,7 +92,23 @@ export default function Header() {
                   </span>
                 )}
               </button>
+
+              {/* Mobile menu button */}
+              <div className="md:hidden">
+                <button className="text-gray-600 hover:text-gray-900">
+                  <Menu className="h-6 w-6" />
+                </button>
+              </div>
             </div>
+          </div>
+
+          {/* Mobile Search Bar */}
+          <div className="md:hidden pb-4">
+            <SearchInput 
+              placeholder="Search products..."
+              onResultSelect={handleSearchResultSelect}
+              className="w-full"
+            />
           </div>
         </div>
       </header>

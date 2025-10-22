@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, ShoppingCart, User, Package } from 'lucide-react';
@@ -29,15 +29,15 @@ export default function MobileNavBar() {
     };
   }, []);
 
-  const handleMobileSignIn = async () => {
+  const handleMobileSignIn = useCallback(async () => {
     try {
       await signInDemo();
     } catch (error) {
       console.error('Mobile sign in error:', error);
     }
-  };
+  }, []);
 
-  const navItems = [
+  const navItems = useMemo(() => [
     {
       name: 'Home',
       href: '/',
@@ -65,7 +65,7 @@ export default function MobileNavBar() {
       isActive: pathname.includes('/account'),
       onClick: !user ? handleMobileSignIn : undefined
     }
-  ];
+  ], [pathname, itemCount, toggleCartDrawer, user, handleMobileSignIn]);
 
   return (
     <>
