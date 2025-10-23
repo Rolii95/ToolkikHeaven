@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase/server';
 import { Product, CartItem } from '../../types';
 import { applyCustomPricingRules, CartItemWithPrice } from '../../services/pricing';
 import CartItemsList from '../../components/CartItemsList';
+import { measurePageLoad } from '../../lib/performance';
 
 // Mock cart data for development
 const mockCartItems: CartItem[] = [
@@ -99,6 +100,16 @@ function convertToCartItemWithPrice(cartItems: CartItem[]): CartItemWithPrice[] 
   }));
 }
 
+// Cart Performance Client Component for monitoring
+function CartPerformanceTracker() {
+  React.useEffect(() => {
+    const cleanup = measurePageLoad('cart');
+    return cleanup;
+  }, []);
+
+  return null;
+}
+
 export default async function CartPage() {
   const cartItems = await getCartItems();
   const populatedCartItems = await getProductsForCart(cartItems);
@@ -119,7 +130,9 @@ export default async function CartPage() {
   if (populatedCartItems.length === 0) {
     return (
       <main className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
+        <CartPerformanceTracker />
+        {/* Fixed height container to prevent CLS */}
+        <div className="max-w-4xl mx-auto px-4 py-16 sm:px-6 lg:px-8" style={{ minHeight: '600px' }}>
           <div className="text-center">
             <div className="bg-white rounded-lg shadow-md p-12">
               <div className="text-6xl mb-4">🛒</div>
@@ -144,30 +157,38 @@ export default async function CartPage() {
 
   return (
     <main className="min-h-screen bg-gray-50">
+      <CartPerformanceTracker />
       <div className="max-w-6xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Cart Items */}
-          <CartItemsList cartItems={populatedCartItems} />
+        {/* Fixed grid layout to prevent CLS */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8" style={{ minHeight: '500px' }}>
+          {/* Cart Items - Fixed width column */}
+          <div className="lg:col-span-2">
+            <CartItemsList cartItems={populatedCartItems} />
+          </div>
 
-          {/* Order Summary */}
+          {/* Order Summary - Fixed width and positioned to prevent shifts */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-md p-6 sticky top-8">
+            <div className="bg-white rounded-lg shadow-md p-6 sticky top-8" style={{ minHeight: '600px' }}>
               <h2 className="text-xl font-bold text-gray-900 mb-6">Order Summary</h2>
               
-              <div className="space-y-3 mb-6">
+              {/* Fixed height for summary sections to prevent CLS */}
+              <div className="space-y-3 mb-6" style={{ minHeight: '200px' }}>
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal ({populatedCartItems.length} items)</span>
                   <span>${pricingResults.subtotal.toFixed(2)}</span>
                 </div>
                 
-                {pricingResults.rulesApplied.filter(rule => rule.applied && rule.savings > 0).map((rule, index) => (
-                  <div key={index} className="flex justify-between text-green-600">
-                    <span>{rule.description}</span>
-                    <span>-${rule.savings.toFixed(2)}</span>
-                  </div>
-                ))}
+                {/* Applied discounts section with reserved space */}
+                <div style={{ minHeight: '60px' }}>
+                  {pricingResults.rulesApplied.filter(rule => rule.applied && rule.savings > 0).map((rule, index) => (
+                    <div key={index} className="flex justify-between text-green-600 mb-1">
+                      <span>{rule.description}</span>
+                      <span>-${rule.savings.toFixed(2)}</span>
+                    </div>
+                  ))}
+                </div>
                 
                 <div className="flex justify-between text-gray-600">
                   <span>Shipping</span>
@@ -191,33 +212,38 @@ export default async function CartPage() {
                 </div>
               </div>
 
-              {/* Applied Rules Info */}
-              {pricingResults.rulesApplied.length > 0 && (
-                <div className="mb-6 p-3 bg-green-50 rounded-lg">
-                  <h3 className="text-sm font-semibold text-green-800 mb-2">
-                    Active Discounts:
-                  </h3>
-                  <ul className="text-sm text-green-700 space-y-1">
-                    {pricingResults.rulesApplied.map((rule, index) => (
-                      <li key={index}>• {rule.description}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+              {/* Applied Rules Info with reserved space */}
+              <div className="mb-6" style={{ minHeight: '80px' }}>
+                {pricingResults.rulesApplied.length > 0 && (
+                  <div className="p-3 bg-green-50 rounded-lg">
+                    <h3 className="text-sm font-semibold text-green-800 mb-2">
+                      Active Discounts:
+                    </h3>
+                    <ul className="text-sm text-green-700 space-y-1">
+                      {pricingResults.rulesApplied.map((rule, index) => (
+                        <li key={index}>• {rule.description}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
 
-              <a
-                href="/checkout"
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors mb-3 block text-center"
-              >
-                Proceed to Checkout
-              </a>
-              
-              <button className="w-full bg-gray-100 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors">
-                Save for Later
-              </button>
+              {/* Fixed button layout */}
+              <div className="space-y-3 mb-6">
+                <a
+                  href="/checkout"
+                  className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors block text-center"
+                >
+                  Proceed to Checkout
+                </a>
+                
+                <button className="w-full bg-gray-100 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-200 transition-colors">
+                  Save for Later
+                </button>
+              </div>
 
-              {/* Security Features */}
-              <div className="mt-6 pt-6 border-t">
+              {/* Security Features - Fixed at bottom */}
+              <div className="pt-6 border-t">
                 <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
                   <span>🔒</span>
                   <span>Secure checkout</span>

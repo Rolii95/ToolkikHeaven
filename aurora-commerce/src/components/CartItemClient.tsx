@@ -20,8 +20,12 @@ export default function CartItemClient({ item, onUpdateQuantity, onRemoveItem }:
     <div className="flex items-center gap-4 p-4 bg-white rounded-lg shadow-sm border">
       <ProductImage
         src={product.imageUrl}
-        alt={product.name}
-        className="w-20 h-20 object-cover rounded-md"
+        alt={`${product.name} in cart`}
+        className="w-20 h-20 rounded-md"
+        width={80}
+        height={80}
+        priority={false}
+        sizes="80px"
       />
       
       <div className="flex-1 min-w-0">

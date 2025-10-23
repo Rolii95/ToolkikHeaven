@@ -99,8 +99,8 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-purple-700 text-white">
+      {/* Hero Section - Fixed height to prevent CLS */}
+      <section className="bg-gradient-to-r from-blue-600 to-purple-700 text-white" style={{ minHeight: '500px' }}>
         <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-4">
@@ -127,8 +127,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Products Section */}
-      <section id="products" className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
+      {/* Products Section - Fixed min-height to prevent CLS */}
+      <section id="products" className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8" style={{ minHeight: '800px' }}>
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">Featured Products</h2>
           <p className="text-lg text-gray-600">
@@ -150,15 +150,19 @@ export default async function HomePage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+            {products.map((product, index) => (
+              <ProductCard 
+                key={product.id} 
+                product={product} 
+                priority={index < 4} // First 4 products get priority loading
+              />
             ))}
           </div>
         )}
       </section>
 
-      {/* Features Section */}
-      <section className="bg-white py-16">
+      {/* Features Section - Fixed height to prevent CLS */}
+      <section className="bg-white py-16" style={{ minHeight: '400px' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Shop With Us?</h2>

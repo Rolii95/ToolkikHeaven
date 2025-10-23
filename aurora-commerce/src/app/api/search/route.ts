@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase/server';
 import { Product } from '@/types';
+import { createApiLogger } from '@/lib/logger';
 
 // Mock products data (same as products API for consistency)
 const mockProducts: Product[] = [
@@ -89,18 +90,37 @@ function searchMockProducts(query: string, limit: number = 10): Product[] {
 }
 
 export async function GET(request: Request) {
+  const logger = createApiLogger(request);
+  
   try {
     const { searchParams } = new URL(request.url);
     const query = searchParams.get('q');
     const limitParam = searchParams.get('limit');
     const limit = limitParam ? parseInt(limitParam, 10) : 10;
 
+    logger.info('search_request_start', 'Starting product search request', {
+      query: query || 'empty',
+      limit,
+      endpoint: '/api/search'
+    });
+
     if (!query || query.trim().length === 0) {
+      logger.info('search_empty_query', 'Search request with empty query', {
+        resultCount: 0
+      });
       return NextResponse.json([]);
     }
 
+    logger.debug('search_parameters_validated', 'Search parameters validated', {
+      query: query.trim(),
+      limit,
+      queryLength: query.trim().length
+    });
+
     // Try Supabase first with full-text search or LIKE query
     try {
+      logger.debug('search_supabase_fts_attempt', 'Attempting Supabase full-text search');
+      
       // First, try to use Supabase's full-text search (if available)
       const { data: ftsData, error: ftsError } = await supabase
         .from('products')
@@ -109,8 +129,15 @@ export async function GET(request: Request) {
         .limit(limit);
 
       if (!ftsError && ftsData && ftsData.length > 0) {
+        logger.info('search_success', 'Search completed successfully via full-text search', {
+          query,
+          resultCount: ftsData.length,
+          source: 'supabase_fts'
+        });
         return NextResponse.json(ftsData);
       }
+
+      logger.debug('search_supabase_like_attempt', 'Full-text search failed, trying LIKE queries');
 
       // Fallback to LIKE queries for broader compatibility
       const { data, error } = await supabase
@@ -120,17 +147,48 @@ export async function GET(request: Request) {
         .limit(limit);
 
       if (error) {
-        console.log('Supabase search error, using mock data:', error.message);
-        return NextResponse.json(searchMockProducts(query, limit));
+        logger.warn('search_supabase_failed', 'Supabase search failed, using mock data', {
+          error: error.message,
+          query,
+          fallbackReason: 'supabase_error'
+        });
+        const mockResults = searchMockProducts(query, limit);
+        logger.info('search_success', 'Search completed successfully via mock data', {
+          query,
+          resultCount: mockResults.length,
+          source: 'mock'
+        });
+        return NextResponse.json(mockResults);
       }
 
+      logger.info('search_success', 'Search completed successfully via LIKE queries', {
+        query,
+        resultCount: data?.length || 0,
+        source: 'supabase_like'
+      });
       return NextResponse.json(data || []);
     } catch (supabaseError) {
-      console.log('Supabase not available, using mock search:', supabaseError);
-      return NextResponse.json(searchMockProducts(query, limit));
+      logger.warn('search_supabase_exception', 'Supabase not available, using mock search', {
+        error: supabaseError instanceof Error ? supabaseError.message : 'Unknown error',
+        query,
+        fallbackReason: 'supabase_unavailable'
+      });
+      const mockResults = searchMockProducts(query, limit);
+      logger.info('search_success', 'Search completed successfully via mock data', {
+        query,
+        resultCount: mockResults.length,
+        source: 'mock'
+      });
+      return NextResponse.json(mockResults);
     }
   } catch (error) {
-    console.error('Search API error:', error);
-    return NextResponse.json({ error: 'Search failed' }, { status: 500 });
+    logger.error('search_failed', 'Search API request failed', {
+      error: error instanceof Error ? error.message : 'Unknown error'
+    }, error instanceof Error ? error : undefined);
+    
+    return NextResponse.json({ 
+      error: 'Search failed',
+      traceId: logger.getTraceId()
+    }, { status: 500 });
   }
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase/server';
 import { Product } from '@/types';
+import { createApiLogger } from '@/lib/logger';
 
 // Mock products data
 const mockProducts: Product[] = [
@@ -67,26 +68,55 @@ const mockProducts: Product[] = [
 ];
 
 export async function GET(request: Request) {
+    const logger = createApiLogger(request);
+    logger.info('products_fetch_start', 'Starting products retrieval request');
+
     try {
         // Try to fetch from Supabase first
+        logger.debug('products_supabase_attempt', 'Attempting to fetch products from Supabase');
         const { data, error } = await supabase
             .from('products')
             .select('*');
 
         if (error) {
-            console.log('Supabase not configured or error occurred, using mock data:', error.message);
+            logger.warn('products_supabase_failed', 'Supabase fetch failed, using mock data', {
+                error: error.message,
+                fallbackReason: 'supabase_error'
+            });
+            logger.info('products_fetch_success', 'Products retrieved successfully (mock data)', {
+                productCount: mockProducts.length,
+                source: 'mock'
+            });
             return NextResponse.json(mockProducts);
         }
 
         // If no data from Supabase, use mock data
         if (!data || data.length === 0) {
-            console.log('No products in Supabase, using mock data');
+            logger.warn('products_supabase_empty', 'No products in Supabase, using mock data', {
+                fallbackReason: 'empty_database'
+            });
+            logger.info('products_fetch_success', 'Products retrieved successfully (mock data)', {
+                productCount: mockProducts.length,
+                source: 'mock'
+            });
             return NextResponse.json(mockProducts);
         }
 
+        logger.info('products_fetch_success', 'Products retrieved successfully from database', {
+            productCount: data.length,
+            source: 'supabase'
+        });
         return NextResponse.json(data);
     } catch (error) {
-        console.log('Failed to connect to Supabase, using mock data:', error);
+        logger.error('products_fetch_exception', 'Failed to fetch products, using mock data', {
+            error: error instanceof Error ? error.message : 'Unknown error',
+            fallbackReason: 'connection_failed'
+        }, error instanceof Error ? error : undefined);
+        
+        logger.info('products_fetch_success', 'Products retrieved successfully (mock data)', {
+            productCount: mockProducts.length,
+            source: 'mock'
+        });
         return NextResponse.json(mockProducts);
     }
 }
