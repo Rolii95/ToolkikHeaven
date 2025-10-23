@@ -1,5 +1,5 @@
--- CORRECTED NOTIFICATION SETUP SCRIPT
--- Run this in Supabase SQL Editor after running the main schema fixes
+-- FINAL CORRECTED NOTIFICATION SETUP SCRIPT
+-- Run this in Supabase SQL Editor - all column references fixed
 
 -- 1. Create order_notifications table for real-time notifications
 CREATE TABLE IF NOT EXISTS order_notifications (
@@ -240,6 +240,38 @@ CREATE POLICY "Users can view notifications" ON order_notifications
 
 CREATE POLICY "Users can view alerts" ON priority_alerts
   FOR SELECT USING (auth.role() = 'authenticated');
+
+-- 10. Create utility functions for notification management
+CREATE OR REPLACE FUNCTION mark_notifications_read(notification_ids UUID[])
+RETURNS INTEGER AS $$
+DECLARE
+  updated_count INTEGER;
+BEGIN
+  UPDATE order_notifications 
+  SET is_read = TRUE, read_at = NOW()
+  WHERE id = ANY(notification_ids) AND is_read = FALSE;
+  
+  GET DIAGNOSTICS updated_count = ROW_COUNT;
+  RETURN updated_count;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION acknowledge_alerts(alert_ids UUID[], acknowledged_by_user VARCHAR)
+RETURNS INTEGER AS $$
+DECLARE
+  updated_count INTEGER;
+BEGIN
+  UPDATE priority_alerts 
+  SET 
+    is_acknowledged = TRUE, 
+    acknowledged_by = acknowledged_by_user,
+    acknowledged_at = NOW()
+  WHERE id = ANY(alert_ids) AND is_acknowledged = FALSE;
+  
+  GET DIAGNOSTICS updated_count = ROW_COUNT;
+  RETURN updated_count;
+END;
+$$ LANGUAGE plpgsql;
 
 -- Success message
 SELECT 'Notification system setup completed successfully!' as status;
