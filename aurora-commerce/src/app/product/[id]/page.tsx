@@ -1,7 +1,9 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
+import { Metadata } from 'next';
 import { supabase } from '../../../lib/supabase/server';
 import { Product } from '../../../types';
+import { generateSEOMetadata, generateProductStructuredData, generateBreadcrumbStructuredData, generateMetaDescription as createMetaDescription, generateProductKeywords } from '../../../lib/seo';
 import AddToCartButton from '../../../components/AddToCartButton';
 import ProductImage from '../../../components/ProductImage';
 import ReviewDisplay from '../../../components/ReviewDisplay';
@@ -127,6 +129,28 @@ interface ProductPageProps {
   };
 }
 
+// Generate dynamic metadata for SEO
+export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
+  const product = await getProduct(params.id);
+
+  if (!product) {
+    return generateSEOMetadata({
+      title: 'Product Not Found',
+      description: 'The requested product could not be found.',
+      noIndex: true,
+    });
+  }
+
+  // Use SEO utilities for optimized metadata
+  return generateSEOMetadata({
+    title: `${product.name} - ${product.category}`,
+    description: createMetaDescription(product),
+    keywords: generateProductKeywords(product),
+    image: product.imageUrl,
+    url: `/product/${product.id}`,
+  });
+}
+
 export default async function ProductPage({ params }: ProductPageProps) {
   const product = await getProduct(params.id);
 
@@ -136,8 +160,30 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const relatedProducts = await getRelatedProducts(product.category, product.id);
 
+  // Generate structured data for SEO
+  const productStructuredData = generateProductStructuredData(product);
+  
+  // Generate breadcrumb structured data
+  const breadcrumbStructuredData = generateBreadcrumbStructuredData([
+    { name: 'Home', url: '/' },
+    { name: 'Products', url: '/products' },
+    { name: product.category, url: `/category/${product.category.toLowerCase()}` },
+    { name: product.name, url: `/product/${product.id}` },
+  ]);
+
   return (
-    <main className="min-h-screen bg-gray-50">
+    <>
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productStructuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbStructuredData) }}
+      />
+      
+      <main className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
         <nav className="mb-8">
@@ -315,5 +361,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
         )}
       </div>
     </main>
+    </>
   );
 }

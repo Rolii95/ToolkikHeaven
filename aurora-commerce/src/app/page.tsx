@@ -1,7 +1,26 @@
 import React from 'react';
+import { Metadata } from 'next';
 import { supabase } from '../lib/supabase/server';
 import { Product } from '../types';
 import ProductCard from '../components/ProductCard';
+import { generateSEOMetadata } from '../lib/seo';
+
+// Enhanced metadata for homepage
+export const metadata: Metadata = generateSEOMetadata({
+  title: 'Home - Smart E-commerce Platform',
+  description: 'Shop premium electronics, clothing, furniture and more at Aurora Commerce. Enjoy smart pricing, automatic discounts, and free shipping on orders over $150.',
+  keywords: [
+    'electronics',
+    'clothing',
+    'furniture',
+    'smart pricing',
+    'automatic discounts',
+    'free shipping',
+    'premium products',
+    'online shopping',
+  ],
+  url: '/',
+});
 
 // Mock data for development/demo purposes
 const mockProducts: Product[] = [
