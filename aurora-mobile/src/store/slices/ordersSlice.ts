@@ -1,15 +1,24 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import type {Draft} from 'immer';
+
+export interface OrderItem {
+  id: string;
+  name: string;
+  quantity: number;
+  price: number;
+}
 
 export interface Order {
   id: string;
-  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  status:
+    | 'pending'
+    | 'confirmed'
+    | 'processing'
+    | 'shipped'
+    | 'delivered'
+    | 'cancelled';
   total: number;
-  items: Array<{
-    id: string;
-    name: string;
-    quantity: number;
-    price: number;
-  }>;
+  items: OrderItem[];
   createdAt: string;
   estimatedDelivery?: string;
   trackingNumber?: string;
@@ -33,14 +42,17 @@ const ordersSlice = createSlice({
   name: 'orders',
   initialState,
   reducers: {
-    setOrders: (state, action: PayloadAction<Order[]>) => {
+    setOrders: (state: Draft<OrdersState>, action: PayloadAction<Order[]>) => {
       state.orders = action.payload;
     },
-    addOrder: (state, action: PayloadAction<Order>) => {
+    addOrder: (state: Draft<OrdersState>, action: PayloadAction<Order>) => {
       state.orders.unshift(action.payload);
     },
-    updateOrderStatus: (state, action: PayloadAction<{id: string; status: Order['status']}>) => {
-      const order = state.orders.find(order => order.id === action.payload.id);
+    updateOrderStatus: (
+      state: Draft<OrdersState>,
+      action: PayloadAction<{id: string; status: Order['status']}>,
+    ) => {
+      const order = state.orders.find((entry) => entry.id === action.payload.id);
       if (order) {
         order.status = action.payload.status;
       }
@@ -48,13 +60,19 @@ const ordersSlice = createSlice({
         state.currentOrder.status = action.payload.status;
       }
     },
-    setCurrentOrder: (state, action: PayloadAction<Order | null>) => {
+    setCurrentOrder: (
+      state: Draft<OrdersState>,
+      action: PayloadAction<Order | null>,
+    ) => {
       state.currentOrder = action.payload;
     },
-    setLoading: (state, action: PayloadAction<boolean>) => {
+    setLoading: (state: Draft<OrdersState>, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
-    setError: (state, action: PayloadAction<string | null>) => {
+    setError: (
+      state: Draft<OrdersState>,
+      action: PayloadAction<string | null>,
+    ) => {
       state.error = action.payload;
     },
   },

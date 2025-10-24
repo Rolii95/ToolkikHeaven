@@ -1,51 +1,71 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type'
 }
 
 interface InventoryAlert {
-  alert_id: string;
-  product_id: string;
-  product_name: string;
-  category: string;
-  alert_type: string;
-  current_stock: number;
-  threshold_value: number;
-  alert_message: string;
-  created_at: string;
+  alert_id: string
+  product_id: string
+  product_name: string
+  category: string
+  alert_type: string
+  current_stock: number
+  threshold_value: number
+  alert_message: string
+  created_at: string
 }
 
 interface WebhookPayload {
-  timestamp: string;
-  alert_count: number;
-  alerts: InventoryAlert[];
-  summary: {
-    out_of_stock: number;
-    critical_stock: number;
-    low_stock: number;
-  };
+  timestamp: string
+  alert_count: number
+  alerts: InventoryAlert[]
+  summary: Record<AlertType, number>
 }
 
-serve(async (req) => {
-  // Handle CORS preflight requests
+type AlertType = 'out_of_stock' | 'critical_stock' | 'low_stock'
+
+interface WebhookResult {
+  type: 'primary' | 'backup'
+  success: boolean
+  status?: number
+  error?: string
+}
+
+const summaryInitialState: Record<AlertType, number> = {
+  out_of_stock: 0,
+  critical_stock: 0,
+  low_stock: 0
+}
+
+const getSupabaseClient = (): SupabaseClient => {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')
+  const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Missing Supabase configuration')
+  }
+
+  return createClient(supabaseUrl, supabaseKey)
+}
+
+const getErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error)
+
+serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    const supabase = createClient(supabaseUrl, supabaseKey)
+    const supabase = getSupabaseClient()
 
     console.log('🔍 Starting inventory threshold check...')
 
-    // Get all pending inventory alerts
     const { data: alerts, error: alertsError } = await supabase
-      .rpc('get_pending_inventory_alerts')
+      .rpc<InventoryAlert[]>('get_pending_inventory_alerts')
 
     if (alertsError) {
       console.error('Error fetching alerts:', alertsError)
@@ -54,32 +74,30 @@ serve(async (req) => {
 
     console.log(`📊 Found ${alerts?.length || 0} pending alerts`)
 
-    // If no alerts, return early
     if (!alerts || alerts.length === 0) {
       return new Response(
-        JSON.stringify({ 
-          success: true, 
+        JSON.stringify({
+          success: true,
           message: 'No pending inventory alerts',
           checked_at: new Date().toISOString()
         }),
-        { 
+        {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200 
+          status: 200
         }
       )
     }
 
-    // Group alerts by type for summary
-    const summary = alerts.reduce((acc, alert) => {
-      acc[alert.alert_type as keyof typeof acc] = (acc[alert.alert_type as keyof typeof acc] || 0) + 1
+    const summary = alerts.reduce<Record<AlertType, number>>((acc, alert) => {
+      const type = (alert.alert_type || 'low_stock') as AlertType
+      acc[type] = (acc[type] ?? 0) + 1
       return acc
-    }, { out_of_stock: 0, critical_stock: 0, low_stock: 0 })
+    }, { ...summaryInitialState })
 
-    // Prepare webhook payload
     const webhookPayload: WebhookPayload = {
       timestamp: new Date().toISOString(),
       alert_count: alerts.length,
-      alerts: alerts,
+      alerts,
       summary
     }
 
@@ -88,17 +106,15 @@ serve(async (req) => {
       summary: webhookPayload.summary
     })
 
-    // Send webhook notifications
     const webhookUrl = Deno.env.get('INVENTORY_WEBHOOK_URL')
     const backupWebhookUrl = Deno.env.get('BACKUP_WEBHOOK_URL')
-    
+
     if (!webhookUrl) {
       console.warn('⚠️ No webhook URL configured - alerts not sent externally')
     }
 
-    const webhookResults = []
+    const webhookResults: WebhookResult[] = []
 
-    // Send to primary webhook
     if (webhookUrl) {
       try {
         console.log('📤 Sending to primary webhook...')
@@ -119,13 +135,13 @@ serve(async (req) => {
           webhookResults.push({ type: 'primary', success: false, status: response.status })
         }
       } catch (error) {
-        console.error('❌ Primary webhook error:', error)
-        webhookResults.push({ type: 'primary', success: false, error: error.message })
+        const errorMessage = getErrorMessage(error)
+        console.error('❌ Primary webhook error:', errorMessage)
+        webhookResults.push({ type: 'primary', success: false, error: errorMessage })
       }
     }
 
-    // Send to backup webhook if primary failed
-    if (backupWebhookUrl && webhookResults.some(r => !r.success)) {
+    if (backupWebhookUrl && webhookResults.some(result => !result.success)) {
       try {
         console.log('📤 Sending to backup webhook...')
         const response = await fetch(backupWebhookUrl, {
@@ -145,27 +161,26 @@ serve(async (req) => {
           webhookResults.push({ type: 'backup', success: false, status: response.status })
         }
       } catch (error) {
-        console.error('❌ Backup webhook error:', error)
-        webhookResults.push({ type: 'backup', success: false, error: error.message })
+        const errorMessage = getErrorMessage(error)
+        console.error('❌ Backup webhook error:', errorMessage)
+        webhookResults.push({ type: 'backup', success: false, error: errorMessage })
       }
     }
 
-    // Mark alerts as notified if webhook was successful
-    const successfulWebhook = webhookResults.some(r => r.success)
+    const successfulWebhook = webhookResults.some(result => result.success)
+
     if (successfulWebhook) {
       const alertIds = alerts.map(alert => alert.alert_id)
-      
       const { data: updateResult, error: updateError } = await supabase
-        .rpc('mark_alerts_as_notified', { alert_ids: alertIds })
+        .rpc<number>('mark_alerts_as_notified', { alert_ids: alertIds })
 
       if (updateError) {
         console.error('❌ Error marking alerts as notified:', updateError)
       } else {
-        console.log(`✅ Marked ${updateResult} alerts as notified`)
+        console.log(`✅ Marked ${updateResult ?? 0} alerts as notified`)
       }
     }
 
-    // Send internal notification to database log
     const { error: logError } = await supabase
       .from('inventory_alert_logs')
       .insert({
@@ -180,7 +195,6 @@ serve(async (req) => {
       console.warn('⚠️ Could not log to inventory_alert_logs:', logError.message)
     }
 
-    // Return response
     return new Response(
       JSON.stringify({
         success: true,
@@ -196,14 +210,14 @@ serve(async (req) => {
         status: 200
       }
     )
-
   } catch (error) {
-    console.error('❌ Inventory check function error:', error)
-    
+    const errorMessage = getErrorMessage(error)
+    console.error('❌ Inventory check function error:', errorMessage)
+
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message,
+        error: errorMessage,
         timestamp: new Date().toISOString()
       }),
       {

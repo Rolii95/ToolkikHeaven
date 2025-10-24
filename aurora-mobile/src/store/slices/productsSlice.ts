@@ -1,5 +1,11 @@
-import {createSlice, createAsyncThunk, PayloadAction} from '@reduxjs/toolkit';
+import {
+  createSlice,
+  createAsyncThunk,
+  PayloadAction,
+  type ActionReducerMapBuilder,
+} from '@reduxjs/toolkit';
 import {API_BASE_URL} from '../../config/api';
+import type {Draft} from 'immer';
 
 export interface Product {
   id: string;
@@ -29,6 +35,15 @@ interface ProductsState {
   };
 }
 
+interface ProductsResponse {
+  products?: Product[];
+  featured?: Product[];
+}
+
+interface SearchResponse {
+  products?: Product[];
+}
+
 const initialState: ProductsState = {
   products: [],
   featuredProducts: [],
@@ -44,89 +59,132 @@ const initialState: ProductsState = {
   },
 };
 
-// Async thunks
-export const fetchProducts = createAsyncThunk(
-  'products/fetchProducts',
-  async (params?: {category?: string; limit?: number}) => {
-    const response = await fetch(`${API_BASE_URL}/products?${new URLSearchParams(params).toString()}`);
+const serializeParams = (
+  params?: {category?: string; limit?: number},
+): string => {
+  if (!params) {
+    return '';
+  }
+
+  const searchParams = new URLSearchParams();
+  if (params.category) {
+    searchParams.set('category', params.category);
+  }
+  if (typeof params.limit === 'number') {
+    searchParams.set('limit', String(params.limit));
+  }
+  return searchParams.toString();
+};
+
+const getErrorMessage = (error: unknown): string =>
+  error instanceof Error ? error.message : 'Unknown error';
+
+export const fetchProducts = createAsyncThunk<
+  ProductsResponse,
+  {category?: string; limit?: number} | undefined,
+  {rejectValue: string}
+>('products/fetchProducts', async (params, {rejectWithValue}) => {
+  try {
+    const query = serializeParams(params);
+    const url = query
+      ? `${API_BASE_URL}/products?${query}`
+      : `${API_BASE_URL}/products`;
+
+    const response = await fetch(url);
     if (!response.ok) {
       throw new Error('Failed to fetch products');
     }
-    return response.json();
-  },
-);
+    return (await response.json()) as ProductsResponse;
+  } catch (error) {
+    return rejectWithValue(getErrorMessage(error));
+  }
+});
 
-export const searchProducts = createAsyncThunk(
-  'products/searchProducts',
-  async (query: string) => {
-    const response = await fetch(`${API_BASE_URL}/products/search?q=${encodeURIComponent(query)}`);
+export const searchProducts = createAsyncThunk<
+  SearchResponse,
+  string,
+  {rejectValue: string}
+>('products/searchProducts', async (query, {rejectWithValue}) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/products/search?q=${encodeURIComponent(query)}`,
+    );
     if (!response.ok) {
       throw new Error('Failed to search products');
     }
-    return response.json();
-  },
-);
+    return (await response.json()) as SearchResponse;
+  } catch (error) {
+    return rejectWithValue(getErrorMessage(error));
+  }
+});
 
-export const fetchProductById = createAsyncThunk(
-  'products/fetchProductById',
-  async (id: string) => {
+export const fetchProductById = createAsyncThunk<
+  Product,
+  string,
+  {rejectValue: string}
+>('products/fetchProductById', async (id, {rejectWithValue}) => {
+  try {
     const response = await fetch(`${API_BASE_URL}/products/${id}`);
     if (!response.ok) {
       throw new Error('Failed to fetch product');
     }
-    return response.json();
-  },
-);
+    return (await response.json()) as Product;
+  } catch (error) {
+    return rejectWithValue(getErrorMessage(error));
+  }
+});
 
 const productsSlice = createSlice({
   name: 'products',
   initialState,
   reducers: {
-    clearSearchResults: (state) => {
+    clearSearchResults: (state: Draft<ProductsState>) => {
       state.searchResults = [];
       state.searchQuery = '';
     },
-    setSearchQuery: (state, action: PayloadAction<string>) => {
+    setSearchQuery: (state: Draft<ProductsState>, action: PayloadAction<string>) => {
       state.searchQuery = action.payload;
     },
-    setFilters: (state, action: PayloadAction<Partial<ProductsState['filters']>>) => {
+    setFilters: (
+      state: Draft<ProductsState>,
+      action: PayloadAction<Partial<ProductsState['filters']>>,
+    ) => {
       state.filters = {...state.filters, ...action.payload};
     },
-    clearCurrentProduct: (state) => {
+    clearCurrentProduct: (state: Draft<ProductsState>) => {
       state.currentProduct = null;
     },
   },
-  extraReducers: (builder) => {
+  extraReducers: (builder: ActionReducerMapBuilder<ProductsState>) => {
     builder
-      // Fetch products
       .addCase(fetchProducts.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.products = action.payload.products || [];
-        state.featuredProducts = action.payload.featured || [];
+        state.products = action.payload.products ?? [];
+        state.featuredProducts = action.payload.featured ?? [];
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Failed to fetch products';
+        state.error = action.payload ?? 'Failed to fetch products';
       })
-      // Search products
       .addCase(searchProducts.pending, (state) => {
         state.isLoading = true;
+        state.error = null;
       })
       .addCase(searchProducts.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.searchResults = action.payload.products || [];
+        state.searchResults = action.payload.products ?? [];
       })
       .addCase(searchProducts.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Failed to search products';
+        state.error = action.payload ?? 'Failed to search products';
       })
-      // Fetch product by ID
       .addCase(fetchProductById.pending, (state) => {
         state.isLoading = true;
+        state.error = null;
       })
       .addCase(fetchProductById.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -134,7 +192,7 @@ const productsSlice = createSlice({
       })
       .addCase(fetchProductById.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Failed to fetch product';
+        state.error = action.payload ?? 'Failed to fetch product';
       });
   },
 });

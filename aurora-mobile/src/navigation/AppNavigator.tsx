@@ -1,11 +1,15 @@
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {useSelector} from 'react-redux';
+import {
+  createBottomTabNavigator,
+  type BottomTabNavigationOptions,
+} from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import type {RouteProp} from '@react-navigation/native';
 
-import {RootState} from '../store/store';
 import {Colors} from '../constants/Colors';
+import {useAppSelector} from '../store/hooks';
+import type {RootState} from '../store/store';
 
 // Auth Screens
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -46,9 +50,46 @@ export type MainTabParamList = {
 
 const Stack = createStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
-const AuthStack = createStackNavigator();
+type AuthStackParamList = {
+  Login: undefined;
+  Register: undefined;
+};
+const AuthStack = createStackNavigator<AuthStackParamList>();
 
-const AuthNavigator = () => {
+const getTabBarIcon = (
+  route: RouteProp<MainTabParamList, keyof MainTabParamList>,
+): NonNullable<BottomTabNavigationOptions['tabBarIcon']> => {
+  return ({color, size}) => {
+    let iconName: string = 'home';
+
+    switch (route.name) {
+      case 'Products':
+        iconName = 'shopping-bag';
+        break;
+      case 'Cart':
+        iconName = 'shopping-cart';
+        break;
+      case 'Profile':
+        iconName = 'person';
+        break;
+      default:
+        iconName = 'home';
+    }
+
+    return (
+      <Icon
+        name={iconName}
+        size={size ?? 24}
+        color={color ?? Colors.text}
+      />
+    );
+  };
+};
+
+const selectCartItemCount = (state: RootState) => state.cart.itemCount;
+const selectIsAuthenticated = (state: RootState) => state.auth.isAuthenticated;
+
+const AuthNavigator: React.FC = () => {
   return (
     <AuthStack.Navigator
       screenOptions={{
@@ -62,31 +103,12 @@ const AuthNavigator = () => {
 };
 
 const MainTabs = () => {
-  const cartItemCount = useSelector((state: RootState) => state.cart.itemCount);
+  const cartItemCount = useAppSelector(selectCartItemCount);
 
   return (
     <Tab.Navigator
       screenOptions={({route}) => ({
-        tabBarIcon: ({focused, color, size}) => {
-          let iconName = 'home';
-
-          switch (route.name) {
-            case 'Home':
-              iconName = 'home';
-              break;
-            case 'Products':
-              iconName = 'shopping-bag';
-              break;
-            case 'Cart':
-              iconName = 'shopping-cart';
-              break;
-            case 'Profile':
-              iconName = 'person';
-              break;
-          }
-
-          return <Icon name={iconName} size={size} color={color} />;
-        },
+        tabBarIcon: getTabBarIcon(route),
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.textSecondary,
         tabBarStyle: {
@@ -109,8 +131,8 @@ const MainTabs = () => {
   );
 };
 
-const AppNavigator = () => {
-  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
+const AppNavigator: React.FC = () => {
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
   return (
     <Stack.Navigator
