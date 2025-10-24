@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sendTemplateEmail, formatOrderItemsForEmail } from '../../../../lib/email'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export interface SendEmailRequest {
   template: 'order_confirmation' | 'abandoned_cart_reminder' | 'welcome_email'
   recipient: string

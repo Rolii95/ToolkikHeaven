@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { sendTemplateEmail, formatOrderItemsForEmail } from '../../../../lib/email'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 /**
  * Abandoned cart detection and email automation
  * POST /api/email/abandoned-cart
