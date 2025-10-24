@@ -1,0 +1,17 @@
+-rw-rw-rw- 1 codespace codespace  7313 Oct 23 22:26 base-schema-setup.sql
+-rw-rw-rw- 1 codespace codespace 10169 Oct 24 00:10 corrected-notifications-setup.sql
+-rw-rw-rw- 1 codespace codespace  3893 Oct 23 23:11 create-dashboard-views.sql
+-rw-rw-rw- 1 codespace codespace  4581 Oct 24 00:36 database-analysis.sql
+-rw-rw-rw- 1 codespace codespace  5656 Oct 24 00:00 deployment-validation.sql
+-rw-rw-rw- 1 codespace codespace  9632 Oct 24 00:10 final-notifications-setup.sql
+-rw-rw-rw- 1 codespace codespace  2553 Oct 24 00:06 fix-for-loop-null-error.sql
+-rw-rw-rw- 1 codespace codespace  4261 Oct 24 00:11 fix-notifications-for-loop-null-error.sql
+-rw-rw-rw- 1 codespace codespace  8458 Oct 23 22:09 inventory-alerts-setup.sql
+-rw-rw-rw- 1 codespace codespace 14224 Oct 24 00:28 inventory-management-setup.sql
+-rw-rw-rw- 1 codespace codespace 24828 Oct 24 00:11 master-order-prioritization-setup.sql
+-rw-rw-rw- 1 codespace codespace 13500 Oct 24 00:10 order-notifications-setup.sql
+-rw-rw-rw- 1 codespace codespace  4995 Oct 23 22:36 supabase-quick-setup.sql
+-rw-rw-rw- 1 codespace codespace  1711 Oct 24 00:03 test-deployment.sql
+-rw-rw-rw- 1 codespace codespace  4773 Oct 24 00:30 test-inventory-system.sql
+-rw-rw-rw- 1 codespace codespace  3628 Oct 24 00:20 test-prioritization-system.sql
+-rw-rw-rw- 1 codespace codespace 10760 Oct 23 22:12 webhook-alert-config.sql
