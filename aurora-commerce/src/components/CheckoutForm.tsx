@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useCart } from '../lib/cart';
 
 const CheckoutForm: React.FC = () => {
     const [formData, setFormData] = useState({
@@ -18,9 +19,58 @@ const CheckoutForm: React.FC = () => {
         setFormData({ ...formData, [name]: value });
     };
 
+    const { items, total, clearCart } = useCart();
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Handle form submission logic, such as sending data to the backend
+
+        if (!items || items.length === 0) {
+            alert('Your cart is empty')
+            return
+        }
+
+        try {
+            // Create a draft order server-side to reserve an order id
+            const draftRes = await fetch('/api/orders/create-draft', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items, customer: { name: formData.name, email: formData.email }, total })
+            })
+            const draftJson = await draftRes.json()
+            if (!draftRes.ok) {
+                console.error('Draft order creation failed', draftJson)
+                alert('Failed to create order. Try again.')
+                return
+            }
+
+            const orderId = draftJson.orderId
+
+            // Request a Stripe Checkout session and redirect
+            const paymentRes = await fetch('/api/payments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    items: items.map(i => ({ name: i.name, price: i.price, quantity: i.quantity })),
+                    customerEmail: formData.email,
+                    metadata: { order_id: orderId }
+                })
+            })
+
+            const paymentJson = await paymentRes.json()
+            if (!paymentRes.ok || !paymentJson.url) {
+                console.error('Failed to create Stripe session', paymentJson)
+                alert('Payment initialization failed')
+                return
+            }
+
+            // Clear cart locally (optional) and redirect to Stripe
+            clearCart()
+            window.location.href = paymentJson.url
+
+        } catch (err) {
+            console.error('Checkout error', err)
+            alert('Checkout failed')
+        }
     };
 
     return (
