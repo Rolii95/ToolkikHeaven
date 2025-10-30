@@ -13,6 +13,11 @@ interface AddToCartButtonProps {
   disabled?: boolean;
   children?: React.ReactNode;
   variant?: 'primary' | 'secondary' | 'icon';
+  // Digital product fields
+  isDigital?: boolean;
+  fileFormat?: string;
+  licenseType?: string;
+  product?: any; // Full product object for digital products
 }
 
 export default function AddToCartButton({ 
@@ -23,7 +28,11 @@ export default function AddToCartButton({
   className = '',
   disabled = false,
   children,
-  variant = 'primary'
+  variant = 'primary',
+  isDigital,
+  fileFormat,
+  licenseType,
+  product
 }: AddToCartButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
@@ -50,6 +59,10 @@ export default function AddToCartButton({
         name: productName,
         price: productPrice,
         imageUrl: productImage,
+        isDigital,
+        fileFormat,
+        licenseType,
+        product
       });
 
       // Show success feedback

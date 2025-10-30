@@ -9,12 +9,29 @@ export interface Product {
     category: string;
     stock: number;
     tags: string[];
+    // Digital product fields
+    isDigital?: boolean;
+    downloadUrl?: string;
+    fileSize?: number; // in bytes
+    fileFormat?: string; // e.g., 'PDF', 'ZIP', 'MP4', 'SOFTWARE'
+    licenseType?: 'personal' | 'commercial' | 'extended';
+    instantDownload?: boolean;
+    digitalDeliveryInfo?: string;
+    systemRequirements?: string[];
+    // Preview and demo fields
+    previewUrl?: string;
+    demoUrl?: string;
+    sampleFiles?: string[];
 }
 
 export interface CartItem {
     productId: string;
     quantity: number;
     product?: Product; // Optional populated product data
+    // Digital product specific fields
+    licenseSelected?: 'personal' | 'commercial' | 'extended';
+    downloadReady?: boolean;
+    downloadToken?: string;
 }
 
 export interface Cart {
@@ -110,4 +127,27 @@ export interface ReviewSubmission {
 export interface ReviewFormData {
     rating: number;
     review_text: string;
+}
+
+// Digital Product specific types
+export interface DigitalProductPurchase {
+    id: string;
+    orderId: string;
+    productId: string;
+    userId?: string;
+    downloadUrl: string;
+    downloadToken: string;
+    licenseKey?: string;
+    expiresAt?: string;
+    downloadCount: number;
+    maxDownloads: number;
+    purchasedAt: string;
+}
+
+export interface DigitalLicense {
+    type: 'personal' | 'commercial' | 'extended';
+    description: string;
+    features: string[];
+    restrictions?: string[];
+    priceModifier: number; // multiplier for base price
 }

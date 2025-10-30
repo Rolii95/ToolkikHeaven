@@ -5,6 +5,7 @@ import { Product } from '../types';
 import AddToCartButton from './AddToCartButton';
 import StarRating from './StarRating';
 import ProductImage from './ProductImage';
+import DigitalProductCard from './DigitalProductCard';
 import { getOptimizedImageProps, reportTiming } from '../lib/performance';
 
 interface ProductCardProps {
@@ -13,6 +14,11 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, priority = false }: ProductCardProps) {
+  // If it's a digital product, use the specialized digital product card
+  if (product.isDigital) {
+    return <DigitalProductCard product={product} priority={priority} />;
+  }
+
   const [reviewStats, setReviewStats] = useState({ average_rating: 0, total_reviews: 0 });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -84,6 +90,13 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
             </span>
           </div>
         )}
+
+        {/* Physical Product Badge - to distinguish from digital */}
+        <div className="absolute bottom-2 left-2">
+          <span className="bg-gray-600/80 backdrop-blur-sm text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center gap-1">
+            📦 Physical
+          </span>
+        </div>
       </div>
       
       {/* Fixed height content area to prevent CLS */}
@@ -132,6 +145,8 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
             productName={product.name}
             productPrice={product.price}
             productImage={product.imageUrl}
+            isDigital={false}
+            product={product}
             className="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors text-sm font-medium"
             variant="primary"
           />
@@ -141,6 +156,11 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
           >
             View Details
           </a>
+        </div>
+
+        {/* Shipping Info for Physical Products */}
+        <div className="mt-2 text-xs text-gray-500 text-center">
+          🚚 Free shipping on orders over $150
         </div>
       </div>
     </div>

@@ -83,6 +83,78 @@ const mockProducts: Product[] = [
     imageUrl: 'https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=400&h=300&fit=crop',
     stock: 8,
     tags: ['camera', 'lens', 'professional']
+  },
+  // Digital Products
+  {
+    id: '7',
+    name: 'Web Design Mastery Course',
+    description: 'Complete web design course covering HTML5, CSS3, JavaScript, and React. 50+ hours of content.',
+    price: 149.99,
+    category: 'Digital Courses',
+    imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=300&fit=crop',
+    stock: 999,
+    tags: ['web-design', 'course', 'html', 'css'],
+    isDigital: true,
+    downloadUrl: '/download/web-design-course',
+    fileSize: 8589934592, // 8GB
+    fileFormat: 'ZIP',
+    licenseType: 'personal',
+    instantDownload: true,
+    digitalDeliveryInfo: 'Download link sent instantly after purchase',
+    previewUrl: '/preview/web-design-course'
+  },
+  {
+    id: '8',
+    name: 'Lightroom Presets Pack',
+    description: 'Professional Lightroom presets for portraits, landscapes, and street photography.',
+    price: 39.99,
+    category: 'Digital Assets',
+    imageUrl: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=400&h=300&fit=crop',
+    stock: 999,
+    tags: ['lightroom', 'presets', 'photography'],
+    isDigital: true,
+    downloadUrl: '/download/lightroom-presets',
+    fileSize: 104857600, // 100MB
+    fileFormat: 'ZIP',
+    licenseType: 'commercial',
+    instantDownload: true,
+    digitalDeliveryInfo: 'Instant download + installation guide',
+    previewUrl: '/preview/lightroom-presets'
+  },
+  {
+    id: '9',
+    name: 'Business Plan Templates',
+    description: 'Professional business plan templates with financial models and market analysis.',
+    price: 79.99,
+    category: 'Digital Templates',
+    imageUrl: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&h=300&fit=crop',
+    stock: 999,
+    tags: ['business', 'template', 'startup'],
+    isDigital: true,
+    downloadUrl: '/download/business-templates',
+    fileSize: 52428800, // 50MB
+    fileFormat: 'ZIP',
+    licenseType: 'commercial',
+    instantDownload: true,
+    digitalDeliveryInfo: 'Editable templates in multiple formats'
+  },
+  {
+    id: '10',
+    name: 'Digital Marketing Guide',
+    description: 'Comprehensive 300-page guide covering SEO, social media, and conversion optimization.',
+    price: 19.99,
+    category: 'Digital Books',
+    imageUrl: 'https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=400&h=300&fit=crop',
+    stock: 999,
+    tags: ['ebook', 'marketing', 'seo'],
+    isDigital: true,
+    downloadUrl: '/download/digital-marketing-guide',
+    fileSize: 15728640, // 15MB
+    fileFormat: 'PDF',
+    licenseType: 'personal',
+    instantDownload: true,
+    digitalDeliveryInfo: 'PDF format with bookmarks',
+    previewUrl: '/preview/digital-marketing-guide'
   }
 ];
 
@@ -186,27 +258,34 @@ export default async function HomePage() {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Shop With Us?</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="text-center">
               <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">⚡</span>
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Instant Digital Delivery</h3>
+              <p className="text-gray-600">Download digital products immediately after purchase</p>
+            </div>
+            <div className="text-center">
+              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">🏷️</span>
               </div>
               <h3 className="text-xl font-semibold mb-2">Smart Pricing</h3>
               <p className="text-gray-600">Automatic discounts and bulk pricing for better savings</p>
             </div>
             <div className="text-center">
-              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">🚚</span>
               </div>
               <h3 className="text-xl font-semibold mb-2">Fast Delivery</h3>
-              <p className="text-gray-600">Free shipping on orders over $150 with multiple carrier options</p>
+              <p className="text-gray-600">Free shipping on physical items over $150</p>
             </div>
             <div className="text-center">
-              <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">⭐</span>
               </div>
-              <h3 className="text-xl font-semibold mb-2">Quality Products</h3>
-              <p className="text-gray-600">Carefully curated selection of high-quality items</p>
+              <h3 className="text-xl font-semibold mb-2">Premium Quality</h3>
+              <p className="text-gray-600">Both physical and digital products of the highest quality</p>
             </div>
           </div>
         </div>

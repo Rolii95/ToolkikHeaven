@@ -85,6 +85,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Category pages (you can add more categories as needed)
   const categories = ['Electronics', 'Wearables', 'Furniture', 'Clothing', 'Photography'];
+  const digitalCategories = ['Digital Courses', 'Digital Assets', 'Digital Templates', 'Digital Software', 'Digital Books', 'Digital Design'];
+  
   const categoryPages = categories.map((category) => ({
     url: `${baseUrl}/category/${category.toLowerCase()}`,
     lastModified: new Date(),
@@ -92,5 +94,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...productPages, ...categoryPages];
+  const digitalCategoryPages = digitalCategories.map((category) => ({
+    url: `${baseUrl}/category/${category.toLowerCase().replace(/\s+/g, '-')}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly' as const,
+    priority: 0.7,
+  }));
+
+  // Additional important pages
+  const additionalPages = [
+    {
+      url: `${baseUrl}/digital-products`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/downloads`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    }
+  ];
+
+  return [...staticPages, ...productPages, ...categoryPages, ...digitalCategoryPages, ...additionalPages];
 }
