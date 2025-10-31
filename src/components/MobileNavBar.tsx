@@ -1,41 +1,15 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, ShoppingCart, User, Package } from 'lucide-react';
 import { useCartItemCount, useCartDrawer } from '../lib/store/cartStore';
-import { getCurrentUser, signInDemo } from '../lib/auth';
 
 export default function MobileNavBar() {
   const pathname = usePathname();
   const itemCount = useCartItemCount();
   const { toggle: toggleCartDrawer } = useCartDrawer();
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    // Check for current user on mount
-    setUser(getCurrentUser());
-
-    // Listen for auth changes
-    const handleAuthChange = (event: CustomEvent) => {
-      setUser(event.detail);
-    };
-
-    window.addEventListener('authChange', handleAuthChange as EventListener);
-    
-    return () => {
-      window.removeEventListener('authChange', handleAuthChange as EventListener);
-    };
-  }, []);
-
-  const handleMobileSignIn = useCallback(async () => {
-    try {
-      await signInDemo();
-    } catch (error) {
-      console.error('Mobile sign in error:', error);
-    }
-  }, []);
 
   const navItems = useMemo(() => [
     {
@@ -59,13 +33,12 @@ export default function MobileNavBar() {
       badge: itemCount > 0 ? (itemCount > 99 ? '99+' : itemCount.toString()) : null
     },
     {
-      name: user ? 'Account' : 'Sign In',
-      href: user ? '/account' : '#',
+      name: 'Account',
+      href: '/account',
       icon: User,
-      isActive: pathname.includes('/account'),
-      onClick: !user ? handleMobileSignIn : undefined
+      isActive: pathname.includes('/account')
     }
-  ], [pathname, itemCount, toggleCartDrawer, user, handleMobileSignIn]);
+  ], [pathname, itemCount, toggleCartDrawer]);
 
   return (
     <>
