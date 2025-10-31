@@ -1,104 +1,9 @@
+'use client';
+
 import React from 'react';
-import { supabase } from '../../lib/supabase/server';
-import { Product, CartItem } from '../../types';
+import { useCartStore, useCartItems, useCartTotal, useCartItemCount } from '../../lib/store/cartStore';
 import { applyCustomPricingRules, CartItemWithPrice } from '../../services/pricing';
-import CartItemsList from '../../components/CartItemsList';
 import { measurePageLoad } from '../../lib/performance';
-
-// Mock cart data for development
-const mockCartItems: CartItem[] = [
-  { productId: '1', quantity: 2 },
-  { productId: '4', quantity: 1 },
-  { productId: '5', quantity: 3 }
-];
-
-// Mock products data
-const mockProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Premium Wireless Headphones',
-    description: 'High-quality wireless headphones with noise cancellation and long battery life.',
-    price: 299.99,
-    category: 'Electronics',
-    imageUrl: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop',
-    stock: 50,
-    tags: ['wireless', 'audio', 'premium']
-  },
-  {
-    id: '4',
-    name: 'Portable Bluetooth Speaker',
-    description: 'Compact and powerful Bluetooth speaker perfect for outdoor adventures.',
-    price: 89.99,
-    category: 'Electronics',
-    imageUrl: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=300&h=300&fit=crop',
-    stock: 75,
-    tags: ['bluetooth', 'speaker', 'portable']
-  },
-  {
-    id: '5',
-    name: 'Organic Cotton T-Shirt',
-    description: 'Soft and sustainable organic cotton t-shirt available in multiple colors.',
-    price: 29.99,
-    category: 'Clothing',
-    imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300&h=300&fit=crop',
-    stock: 100,
-    tags: ['organic', 'cotton', 'sustainable']
-  }
-];
-
-async function getCartItems(): Promise<CartItem[]> {
-  try {
-    // In a real app, you would fetch this from user session or database
-    // For now, we'll return mock data
-    return mockCartItems;
-  } catch (error) {
-    console.error('Failed to fetch cart items:', error);
-    return [];
-  }
-}
-
-async function getProductsForCart(cartItems: CartItem[]): Promise<CartItem[]> {
-  try {
-    const productIds = cartItems.map(item => item.productId);
-    
-    // Try to fetch from Supabase first
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .in('id', productIds);
-
-    if (error) {
-      console.log('Using mock product data for cart');
-      // Use mock data and populate cart items
-      return cartItems.map(item => ({
-        ...item,
-        product: mockProducts.find((p: Product) => p.id === item.productId)
-      })).filter(item => item.product);
-    }
-
-    // Populate cart items with product data
-    return cartItems.map(item => ({
-      ...item,
-      product: data?.find((p: Product) => p.id === item.productId) || 
-               mockProducts.find((p: Product) => p.id === item.productId)
-    })).filter(item => item.product);
-  } catch (error) {
-    console.log('Failed to fetch products for cart, using mock data');
-    return cartItems.map(item => ({
-      ...item,
-      product: mockProducts.find((p: Product) => p.id === item.productId)
-    })).filter(item => item.product);
-  }
-}
-
-function convertToCartItemWithPrice(cartItems: CartItem[]): CartItemWithPrice[] {
-  return cartItems.map(item => ({
-    productId: item.productId,
-    quantity: item.quantity,
-    price: item.product?.price || 0,
-    name: item.product?.name || 'Unknown Product'
-  }));
-}
 
 // Cart Performance Client Component for monitoring
 function CartPerformanceTracker() {
@@ -110,12 +15,19 @@ function CartPerformanceTracker() {
   return null;
 }
 
-export default async function CartPage() {
-  const cartItems = await getCartItems();
-  const populatedCartItems = await getProductsForCart(cartItems);
+export default function CartPage() {
+  const cartItems = useCartItems();
+  const cartTotal = useCartTotal();
+  const itemCount = useCartItemCount();
+  const { updateQuantity, removeItem } = useCartStore();
 
-  // Convert to CartItemWithPrice format for pricing service
-  const cartItemsWithPrice = convertToCartItemWithPrice(populatedCartItems);
+  // Convert cart items to pricing format
+  const cartItemsWithPrice: CartItemWithPrice[] = cartItems.map(item => ({
+    productId: item.id,
+    quantity: item.quantity,
+    price: item.price,
+    name: item.name
+  }));
 
   // Apply custom pricing rules
   const pricingResults = applyCustomPricingRules(cartItemsWithPrice);
@@ -127,7 +39,7 @@ export default async function CartPage() {
   const shippingCost = freeShippingApplied ? 0 : standardShipping;
   const finalTotal = pricingResults.finalTotal + shippingCost;
 
-  if (populatedCartItems.length === 0) {
+  if (cartItems.length === 0) {
     return (
       <main className="min-h-screen bg-gray-50">
         <CartPerformanceTracker />
@@ -165,7 +77,82 @@ export default async function CartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8" style={{ minHeight: '500px' }}>
           {/* Cart Items - Fixed width column */}
           <div className="lg:col-span-2">
-            <CartItemsList cartItems={populatedCartItems} />
+            <div className="bg-white rounded-lg shadow-md">
+              {cartItems.map((item) => (
+                <div key={item.id} className="flex items-center gap-4 p-6 border-b border-gray-200 last:border-b-0">
+                  {/* Product Image */}
+                  <div className="flex-shrink-0">
+                    <img
+                      src={item.imageUrl}
+                      alt={item.name}
+                      className="w-20 h-20 object-cover rounded-md"
+                    />
+                  </div>
+
+                  {/* Product Info */}
+                  <div className="flex-grow min-w-0">
+                    <h3 className="text-lg font-semibold text-gray-900 truncate">
+                      {item.name}
+                    </h3>
+                    <p className="text-gray-600 mt-1">
+                      ${item.price.toFixed(2)} each
+                    </p>
+                    {item.isDigital && (
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                          ⚡ Digital
+                        </span>
+                        {item.fileFormat && (
+                          <span className="text-xs text-gray-500">
+                            {item.fileFormat}
+                          </span>
+                        )}
+                        {item.licenseType && (
+                          <span className="text-xs text-gray-500">
+                            {item.licenseType} license
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Quantity Controls */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center border border-gray-300 rounded-md">
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        className="p-2 hover:bg-gray-100 transition-colors"
+                        disabled={item.quantity <= 1}
+                      >
+                        <span className="text-gray-600">−</span>
+                      </button>
+                      <span className="px-4 py-2 border-l border-r border-gray-300 min-w-[3rem] text-center">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        className="p-2 hover:bg-gray-100 transition-colors"
+                      >
+                        <span className="text-gray-600">+</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Item Total */}
+                  <div className="text-right">
+                    <p className="text-lg font-semibold text-gray-900">
+                      ${(item.price * item.quantity).toFixed(2)}
+                    </p>
+                    <button
+                      onClick={() => removeItem(item.id)}
+                      className="text-red-600 hover:text-red-800 text-sm mt-1 transition-colors"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* Order Summary - Fixed width and positioned to prevent shifts */}
@@ -176,7 +163,7 @@ export default async function CartPage() {
               {/* Fixed height for summary sections to prevent CLS */}
               <div className="space-y-3 mb-6" style={{ minHeight: '200px' }}>
                 <div className="flex justify-between text-gray-600">
-                  <span>Subtotal ({populatedCartItems.length} items)</span>
+                  <span>Subtotal ({itemCount} items)</span>
                   <span>${pricingResults.subtotal.toFixed(2)}</span>
                 </div>
                 
