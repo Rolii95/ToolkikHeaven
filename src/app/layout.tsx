@@ -130,6 +130,16 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.className}>
       <head>
+        {/* Favicons and Icons */}
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/manifest.json" />
+        
+        {/* Meta tags */}
+        <meta name="theme-color" content="#3B82F6" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        
         {/* Organization Structured Data */}
         <script
           type="application/ld+json"
