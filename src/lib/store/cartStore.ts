@@ -205,19 +205,11 @@ export const useCartDrawer = () => {
   };
 };
 
-// Digital product selectors - fixed to avoid infinite re-renders
-export const useDigitalCartItems = () => useCartStore(state => 
-  state.items.filter(item => item.isDigital || item.product?.isDigital)
-);
-export const usePhysicalCartItems = () => useCartStore(state => 
-  state.items.filter(item => !item.isDigital && !item.product?.isDigital)
-);
-export const useHasDigitalProducts = () => useCartStore(state => 
-  state.items.some(item => item.isDigital || item.product?.isDigital)
-);
-export const useHasPhysicalProducts = () => useCartStore(state => 
-  state.items.some(item => !item.isDigital && !item.product?.isDigital)
-);
+// Digital product selectors - simplified approach
+export const useDigitalCartItems = () => useCartStore(state => state.items.filter(item => item.isDigital || item.product?.isDigital));
+export const usePhysicalCartItems = () => useCartStore(state => state.items.filter(item => !item.isDigital && !item.product?.isDigital));
+export const useHasDigitalProducts = () => useCartStore(state => state.items.some(item => item.isDigital || item.product?.isDigital));
+export const useHasPhysicalProducts = () => useCartStore(state => state.items.some(item => !item.isDigital && !item.product?.isDigital));
 export const useIsDigitalOnly = () => useCartStore(state => {
   const items = state.items;
   return items.length > 0 && items.every(item => item.isDigital || item.product?.isDigital);

@@ -31,14 +31,14 @@ const CheckoutForm: React.FC = () => {
     const physicalItems = usePhysicalCartItems();
     const isDigitalOnly = useIsDigitalOnly();
 
-    const cartAnalysis = {
+    const cartAnalysis = useMemo(() => ({
         hasDigitalProducts,
         hasPhysicalProducts,
         digitalItems,
         physicalItems,
         isDigitalOnly,
         isMixed: hasDigitalProducts && hasPhysicalProducts
-    };
+    }), [hasDigitalProducts, hasPhysicalProducts, digitalItems, physicalItems, isDigitalOnly]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
