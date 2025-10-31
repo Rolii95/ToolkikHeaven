@@ -9,6 +9,9 @@ import MobileNavBar from '../components/MobileNavBar';
 import CartNotifications from '../components/CartNotifications';
 import WebVitalsReporter from '../components/WebVitalsReporter';
 import PerformanceDashboard from '../components/PerformanceDashboard';
+import ErrorBoundary from '../components/ErrorBoundary';
+import ToastProvider from '../components/ToastProvider';
+import ChatWidget from '../components/ChatWidget';
 import '../styles/globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -156,15 +159,26 @@ export default function RootLayout({
         />
       </head>
       <body className="flex flex-col min-h-screen bg-gray-50">
-        <Header />
-        <main className="flex-grow">
-          {children}
-        </main>
-        <Footer />
-        <MobileNavBar />
-        <CartNotifications />
-        <WebVitalsReporter />
-        <PerformanceDashboard />
+        <ErrorBoundary>
+          <ToastProvider>
+            <Header />
+            <main className="flex-grow">
+              {children}
+            </main>
+            <Footer />
+            <MobileNavBar />
+            <CartNotifications />
+            <WebVitalsReporter />
+            <PerformanceDashboard />
+            <ChatWidget 
+              position="bottom-right"
+              theme="light"
+              companyName="Aurora Commerce"
+              supportEmail="support@auroracommerce.com"
+              supportPhone="+1 (555) 123-4567"
+            />
+          </ToastProvider>
+        </ErrorBoundary>
         <Analytics />
         <SpeedInsights />
       </body>

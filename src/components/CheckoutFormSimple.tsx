@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { useCartStore } from '../lib/store/cartStore';
+import { useToastHelpers } from './ToastProvider';
 
 const CheckoutFormSimple: React.FC = () => {
+    const { success, error, info } = useToastHelpers();
+    
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -28,17 +31,28 @@ const CheckoutFormSimple: React.FC = () => {
         e.preventDefault();
 
         if (!items || items.length === 0) {
-            alert('Your cart is empty')
-            return
+            error('Cart Empty', 'Please add items to your cart before checking out.');
+            return;
+        }
+
+        if (!formData.name.trim() || !formData.email.trim()) {
+            error('Missing Information', 'Please fill in your name and email address.');
+            return;
         }
 
         try {
+            info('Processing Order', 'Please wait while we process your order...');
+            
+            // Simulate order processing
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
             // Just clear cart for now - simplified
-            clearCart()
-            alert('Order submitted successfully!')
+            clearCart();
+            success('Order Successful!', 'Your order has been submitted successfully. You will receive a confirmation email shortly.');
+            
         } catch (err) {
-            console.error('Checkout error', err)
-            alert('Checkout failed')
+            console.error('Checkout error', err);
+            error('Checkout Failed', 'There was an error processing your order. Please try again.');
         }
     };
 
