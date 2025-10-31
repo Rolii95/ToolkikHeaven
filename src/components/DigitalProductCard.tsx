@@ -145,7 +145,7 @@ export default function DigitalProductCard({ product, priority = false }: Digita
         {product.fileSize && (
           <div className="absolute bottom-2 right-2">
             <span className="bg-gray-700/80 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full">
-              {formatFileSize(product.fileSize)}
+              {product.fileSize}
             </span>
           </div>
         )}

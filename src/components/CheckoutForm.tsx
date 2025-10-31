@@ -80,7 +80,7 @@ const CheckoutForm: React.FC = () => {
                         name: i.name, 
                         price: i.price, 
                         quantity: i.quantity,
-                        isDigital: i.isDigital || i.product?.isDigital || false
+                        isDigital: i.isDigital || false
                     })),
                     customerEmail: formData.email,
                     metadata: { 

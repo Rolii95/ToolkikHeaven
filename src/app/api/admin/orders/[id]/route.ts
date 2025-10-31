@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OrderPrioritizationService from '@/lib/order-prioritization';
+import OrderPrioritizationService from '../../../../lib/order-prioritization.ts';
 
 export async function GET(
   request: NextRequest,

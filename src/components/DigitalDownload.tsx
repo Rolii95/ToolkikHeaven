@@ -138,7 +138,7 @@ export default function DigitalDownload({
                 {product.fileSize && (
                   <div className="flex justify-between">
                     <span className="text-gray-600">Size:</span>
-                    <span className="font-medium">{formatFileSize(product.fileSize)}</span>
+                    <span className="font-medium">{product.fileSize}</span>
                   </div>
                 )}
                 <div className="flex justify-between">

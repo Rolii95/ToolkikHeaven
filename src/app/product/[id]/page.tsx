@@ -84,7 +84,7 @@ const mockProducts: Product[] = [
     tags: ['web-design', 'course', 'html', 'css', 'javascript', 'react'],
     isDigital: true,
     downloadUrl: '/download/web-design-course',
-    fileSize: 8589934592, // 8GB
+    fileSize: "8GB",
     fileFormat: 'ZIP',
     licenseType: 'personal',
     instantDownload: true,
@@ -103,7 +103,7 @@ const mockProducts: Product[] = [
     tags: ['lightroom', 'presets', 'photography', 'editing'],
     isDigital: true,
     downloadUrl: '/download/lightroom-presets',
-    fileSize: 104857600, // 100MB
+    fileSize: "100MB",
     fileFormat: 'ZIP',
     licenseType: 'commercial',
     instantDownload: true,
@@ -122,7 +122,7 @@ const mockProducts: Product[] = [
     tags: ['business', 'template', 'startup', 'finance'],
     isDigital: true,
     downloadUrl: '/download/business-templates',
-    fileSize: 52428800, // 50MB
+    fileSize: "50MB",
     fileFormat: 'ZIP',
     licenseType: 'commercial',
     instantDownload: true,
@@ -141,7 +141,7 @@ const mockProducts: Product[] = [
     tags: ['meditation', 'mindfulness', 'app', 'wellness'],
     isDigital: true,
     downloadUrl: '/download/meditation-app',
-    fileSize: 209715200, // 200MB
+    fileSize: "200MB",
     fileFormat: 'SOFTWARE',
     licenseType: 'personal',
     instantDownload: true,
@@ -160,7 +160,7 @@ const mockProducts: Product[] = [
     tags: ['ebook', 'marketing', 'seo', 'digital'],
     isDigital: true,
     downloadUrl: '/download/digital-marketing-guide',
-    fileSize: 15728640, // 15MB
+    fileSize: "15MB",
     fileFormat: 'PDF',
     licenseType: 'personal',
     instantDownload: true,
@@ -179,7 +179,7 @@ const mockProducts: Product[] = [
     tags: ['figma', 'ui-kit', 'design', 'components'],
     isDigital: true,
     downloadUrl: '/download/figma-design-kit',
-    fileSize: 209715200, // 200MB
+    fileSize: "200MB",
     fileFormat: 'ZIP',
     licenseType: 'commercial',
     instantDownload: true,
@@ -378,7 +378,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     {product.fileSize && (
                       <div>
                         <span className="font-medium text-gray-700">File Size:</span>
-                        <span className="ml-2 text-gray-600">{formatFileSize(product.fileSize)}</span>
+                        <span className="ml-2 text-gray-600">{product.fileSize}</span>
                       </div>
                     )}
                     {product.fileFormat && (

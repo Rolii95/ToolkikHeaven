@@ -20,7 +20,7 @@ const mockDigitalProduct: Product = {
   tags: ['web-design', 'course', 'html', 'css', 'javascript', 'react'],
   isDigital: true,
   downloadUrl: '/api/download/web-design-course',
-  fileSize: 8589934592, // 8GB
+  fileSize: "8GB",
   fileFormat: 'ZIP',
   licenseType: 'personal',
   instantDownload: true,

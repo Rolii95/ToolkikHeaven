@@ -2,7 +2,6 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Product } from '../../types';
 
 export interface CartItem {
   id: string;
@@ -10,11 +9,11 @@ export interface CartItem {
   price: number;
   quantity: number;
   imageUrl: string;
-  // Digital product specific fields
   isDigital?: boolean;
   fileFormat?: string;
   licenseType?: string;
-  product?: Product; // Optional full product data
+  fileSize?: string;
+  downloadUrl?: string;
 }
 
 interface CartStore {
@@ -36,13 +35,6 @@ interface CartStore {
   // Helpers
   getItemQuantity: (id: string) => number;
   isItemInCart: (id: string) => boolean;
-  
-  // Digital product helpers
-  hasDigitalProducts: () => boolean;
-  hasPhysicalProducts: () => boolean;
-  getDigitalItems: () => CartItem[];
-  getPhysicalItems: () => CartItem[];
-  isDigitalOnly: () => boolean;
 }
 
 // Helper function to calculate totals
@@ -163,28 +155,6 @@ export const useCartStore = create<CartStore>()((set, get) => ({
   isItemInCart: (id) => {
     return get().items.some(item => item.id === id);
   },
-
-  // Digital product helpers
-  hasDigitalProducts: () => {
-    return get().items.some(item => item.isDigital || item.product?.isDigital);
-  },
-
-  hasPhysicalProducts: () => {
-    return get().items.some(item => !item.isDigital && !item.product?.isDigital);
-  },
-
-  getDigitalItems: () => {
-    return get().items.filter(item => item.isDigital || item.product?.isDigital);
-  },
-
-  getPhysicalItems: () => {
-    return get().items.filter(item => !item.isDigital && !item.product?.isDigital);
-  },
-
-  isDigitalOnly: () => {
-    const items = get().items;
-    return items.length > 0 && items.every(item => item.isDigital || item.product?.isDigital);
-  },
 }));
 
 // Selectors for better performance
@@ -205,12 +175,27 @@ export const useCartDrawer = () => {
   };
 };
 
-// Digital product selectors - simplified approach
-export const useDigitalCartItems = () => useCartStore(state => state.items.filter(item => item.isDigital || item.product?.isDigital));
-export const usePhysicalCartItems = () => useCartStore(state => state.items.filter(item => !item.isDigital && !item.product?.isDigital));
-export const useHasDigitalProducts = () => useCartStore(state => state.items.some(item => item.isDigital || item.product?.isDigital));
-export const useHasPhysicalProducts = () => useCartStore(state => state.items.some(item => !item.isDigital && !item.product?.isDigital));
+// Digital/Physical product utility selectors
+export const useHasDigitalProducts = () => useCartStore(state => 
+  state.items.some(item => item.isDigital === true)
+);
+
+export const useHasPhysicalProducts = () => useCartStore(state => 
+  state.items.some(item => item.isDigital !== true)
+);
+
+export const useDigitalCartItems = () => useCartStore(state => 
+  state.items.filter(item => item.isDigital === true)
+);
+
+export const usePhysicalCartItems = () => useCartStore(state => 
+  state.items.filter(item => item.isDigital !== true)
+);
+
 export const useIsDigitalOnly = () => useCartStore(state => {
-  const items = state.items;
-  return items.length > 0 && items.every(item => item.isDigital || item.product?.isDigital);
+  const hasItems = state.items.length > 0;
+  const hasDigital = state.items.some(item => item.isDigital === true);
+  const hasPhysical = state.items.some(item => item.isDigital !== true);
+  
+  return hasItems && hasDigital && !hasPhysical;
 });

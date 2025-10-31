@@ -96,7 +96,7 @@ const mockProducts: Product[] = [
     tags: ['web-design', 'course', 'html', 'css'],
     isDigital: true,
     downloadUrl: '/download/web-design-course',
-    fileSize: 8589934592, // 8GB
+    fileSize: "8GB",
     fileFormat: 'ZIP',
     licenseType: 'personal',
     instantDownload: true,
@@ -114,7 +114,7 @@ const mockProducts: Product[] = [
     tags: ['lightroom', 'presets', 'photography'],
     isDigital: true,
     downloadUrl: '/download/lightroom-presets',
-    fileSize: 104857600, // 100MB
+    fileSize: "100MB",
     fileFormat: 'ZIP',
     licenseType: 'commercial',
     instantDownload: true,
@@ -132,7 +132,7 @@ const mockProducts: Product[] = [
     tags: ['business', 'template', 'startup'],
     isDigital: true,
     downloadUrl: '/download/business-templates',
-    fileSize: 52428800, // 50MB
+    fileSize: "50MB",
     fileFormat: 'ZIP',
     licenseType: 'commercial',
     instantDownload: true,
@@ -149,7 +149,7 @@ const mockProducts: Product[] = [
     tags: ['ebook', 'marketing', 'seo'],
     isDigital: true,
     downloadUrl: '/download/digital-marketing-guide',
-    fileSize: 15728640, // 15MB
+    fileSize: "15MB",
     fileFormat: 'PDF',
     licenseType: 'personal',
     instantDownload: true,

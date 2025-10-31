@@ -61,8 +61,7 @@ export default function AddToCartButton({
         imageUrl: productImage,
         isDigital,
         fileFormat,
-        licenseType,
-        product
+        licenseType
       });
 
       // Show success feedback

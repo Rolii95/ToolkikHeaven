@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { Product } from '../types';
 
 export interface CartItem {
   id: string;
@@ -7,11 +6,6 @@ export interface CartItem {
   price: number;
   quantity: number;
   imageUrl: string;
-  // Digital product specific fields
-  isDigital?: boolean;
-  fileFormat?: string;
-  licenseType?: string;
-  product?: Product; // Optional full product data for convenience
 }
 
 interface CartState {
@@ -87,11 +81,6 @@ interface CartContextType {
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
   itemCount: number;
-  // Helper methods for digital products
-  hasDigitalProducts: boolean;
-  hasPhysicalProducts: boolean;
-  digitalItems: CartItem[];
-  physicalItems: CartItem[];
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -116,12 +105,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const itemCount = state.items.reduce((sum, item) => sum + item.quantity, 0);
-  
-  // Digital product helpers
-  const digitalItems = state.items.filter(item => item.isDigital || item.product?.isDigital);
-  const physicalItems = state.items.filter(item => !item.isDigital && !item.product?.isDigital);
-  const hasDigitalProducts = digitalItems.length > 0;
-  const hasPhysicalProducts = physicalItems.length > 0;
 
   return (
     <CartContext.Provider value={{
@@ -131,11 +114,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       removeItem,
       updateQuantity,
       clearCart,
-      itemCount,
-      hasDigitalProducts,
-      hasPhysicalProducts,
-      digitalItems,
-      physicalItems
+      itemCount
     }}>
       {children}
     </CartContext.Provider>
