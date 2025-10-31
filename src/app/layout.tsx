@@ -12,6 +12,7 @@ import PerformanceDashboard from '../components/PerformanceDashboard';
 import ErrorBoundary from '../components/ErrorBoundary';
 import ToastProvider from '../components/ToastProvider';
 import ChatWidget from '../components/ChatWidget';
+import LiveOrderFeed from '../components/LiveOrderFeed';
 import '../styles/globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -177,6 +178,7 @@ export default function RootLayout({
               supportEmail="support@auroracommerce.com"
               supportPhone="+1 (555) 123-4567"
             />
+            <LiveOrderFeed />
           </ToastProvider>
         </ErrorBoundary>
         <Analytics />
